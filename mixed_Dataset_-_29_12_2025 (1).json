@@ -1,0 +1,230 @@
+[
+  {
+    "id": "1",
+    "timestamp": "2023-10-01T10:00:00Z",
+    "input_features": {
+      "workflow_id": "A1",
+      "result": "successful",
+      "market_conditions": "bullish",
+      "signal_strength": "high"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "The autonomous workflow performed effectively in a bullish market with strong signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Favorable market trends observed."
+    },
+    "quality_score": 85
+  },
+  {
+    "id": "2",
+    "timestamp": "2023-10-01T11:00:00Z",
+    "input_features": {
+      "workflow_id": "A2",
+      "result": "failed",
+      "market_conditions": "bearish",
+      "signal_strength": "low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "The autonomous workflow failed in a bearish market with weak signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Adverse market conditions prevailing."
+    },
+    "quality_score": 75
+  },
+  {
+    "id": "3",
+    "timestamp": "2023-10-01T12:00:00Z",
+    "input_features": {
+      "workflow_id": "A3",
+      "result": "successful",
+      "market_conditions": "neutral",
+      "signal_strength": "medium"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "The workflow succeeded under neutral conditions with average signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Stable market observed."
+    },
+    "quality_score": 80
+  },
+  {
+    "id": "4",
+    "timestamp": "2023-10-01T13:00:00Z",
+    "input_features": {
+      "workflow_id": "A4",
+      "result": "failed",
+      "market_conditions": "volatile",
+      "signal_strength": "very low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "Workflow failure due to high volatility and low signal strength."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Market volatility was unusually high."
+    },
+    "quality_score": 70
+  },
+  {
+    "id": "5",
+    "timestamp": "2023-10-01T14:00:00Z",
+    "input_features": {
+      "workflow_id": "A5",
+      "result": "successful",
+      "market_conditions": "bullish",
+      "signal_strength": "very high"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "Successful outcome due to strong bullish signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Strong bullish trends reported."
+    },
+    "quality_score": 90
+  },
+  {
+    "id": "6",
+    "timestamp": "2023-10-01T15:00:00Z",
+    "input_features": {
+      "workflow_id": "A6",
+      "result": "failed",
+      "market_conditions": "bearish",
+      "signal_strength": "low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "Failure in bearish conditions with poor signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Bearish pressure noted."
+    },
+    "quality_score": 72
+  },
+  {
+    "id": "7",
+    "timestamp": "2023-10-02T10:00:00Z",
+    "input_features": {
+      "workflow_id": "A7",
+      "result": "successful",
+      "market_conditions": "neutral",
+      "signal_strength": "high"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "Workflow succeeded in a neutral market with strong signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Neutral market stability observed."
+    },
+    "quality_score": 82
+  },
+  {
+    "id": "8",
+    "timestamp": "2023-10-02T11:00:00Z",
+    "input_features": {
+      "workflow_id": "A8",
+      "result": "failed",
+      "market_conditions": "volatile",
+      "signal_strength": "extremely low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "Workflow failure due to extreme volatility."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Extreme fluctuations reported."
+    },
+    "quality_score": 65
+  },
+  {
+    "id": "9",
+    "timestamp": "2023-10-02T12:00:00Z",
+    "input_features": {
+      "workflow_id": "A9",
+      "result": "successful",
+      "market_conditions": "bullish",
+      "signal_strength": "medium"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "Successful result in a moderately bullish market."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Moderate bullish trends indicated."
+    },
+    "quality_score": 78
+  },
+  {
+    "id": "10",
+    "timestamp": "2023-10-02T13:00:00Z",
+    "input_features": {
+      "workflow_id": "A10",
+      "result": "failed",
+      "market_conditions": "bearish",
+      "signal_strength": "very low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "Failure in a bearish market with very low signals."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Bearish trend dominance."
+    },
+    "quality_score": 70
+  },
+  {
+    "id": "11",
+    "timestamp": "2023-10-03T10:00:00Z",
+    "input_features": {
+      "workflow_id": "A11",
+      "result": "successful",
+      "market_conditions": "neutral",
+      "signal_strength": "medium"
+    },
+    "output_label": {
+      "outcome": "positive",
+      "description": "Satisfactory performance in neutral conditions."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "Stabilized context noted."
+    },
+    "quality_score": 76
+  },
+  {
+    "id": "12",
+    "timestamp": "2023-10-03T11:00:00Z",
+    "input_features": {
+      "workflow_id": "A12",
+      "result": "failed",
+      "market_conditions": "volatile",
+      "signal_strength": "low"
+    },
+    "output_label": {
+      "outcome": "negative",
+      "description": "Failure attributed to market volatility."
+    },
+    "context": {
+      "source": "autonomous workflows",
+      "market_analysis": "High market tension reported."
+    },
+    "quality_score": 68
+  }
+]
