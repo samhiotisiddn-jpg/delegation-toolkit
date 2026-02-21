@@ -1,0 +1,22 @@
+# FractalMesh Sovereign Orchestrator — Python dependencies
+#
+# All three packages are OPTIONAL — the orchestrator degrades gracefully
+# without them, but full functionality requires all three.
+#
+# Install with:
+#   pip install -r requirements.txt
+#
+# Or for a minimal install without extras:
+#   python fractalmesh/orchestrator/orchestrator.py  (stdlib-only mode)
+
+# YAML registry parsing (strongly recommended)
+# Without this the orchestrator cannot read registry.yaml
+pyyaml>=6.0
+
+# Process resource monitoring (CPU%, mem, open-fd counts)
+# Without this the resource_ok health check is skipped
+psutil>=5.9
+
+# HTTP heartbeat polling for /health endpoints
+# Without this the heartbeat_ok health check is skipped
+requests>=2.28
