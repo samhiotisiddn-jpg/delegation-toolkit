@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# FractalMesh Sovereign Orchestrator — Agent Registry
+# FractalMesh Sovereign Orchestrator — Agent Registry  v2
 # Mode B: supervise only, no code mutation, no evolution
 #
 # This file is the constitution of the mesh.
@@ -19,6 +19,10 @@
 #              always  — restart on any failure (recommended)
 #              never   — do not auto-restart (manual only)
 #              on-failure — restart only when exit code != 0
+# schedule     (str, optional)  Cron-style expression for periodic agents.
+#              Supported tokens: @hourly @daily @weekly  or "HH:MM" (UTC daily).
+#              Scheduled agents are run by the orchestrator and do NOT bind
+#              a persistent TCP port (omit `port` for these).
 # depends_on   (list[str], optional)
 #              Names of agents that MUST be running before this one starts.
 #              The orchestrator uses this to build the DAG and compute safe
@@ -132,3 +136,56 @@ agents:
       - converge
     env:
       - OPENAI_API_KEY
+
+  # ── Monetization layer ───────────────────────────────────────────────────────
+  # revenue_pipe: scheduled daily billing run (03:00 UTC).
+  # Depends on converge (which holds STRIPE_SECRET_KEY) being healthy first.
+
+  - name: revenue_pipe
+    script: /fractalmesh/agents/revenue_pipe.py
+    schedule: "03:00"
+    log: /fractalmesh/agents/logs/revenue_pipe.log
+    restart: on-failure
+    depends_on:
+      - converge
+    env:
+      - STRIPE_SECRET_KEY
+      - STRIPE_WEBHOOK_SECRET
+      - SUPABASE_URL
+      - SUPABASE_SERVICE_KEY
+      - ABN
+      - REVENUE_PIPE_COHORT_TAG
+      - REVENUE_PIPE_CHARGE_AMOUNT
+      - REVENUE_PIPE_PREMIUM_AMOUNT
+      - REVENUE_PIPE_STANDARD_AMOUNT
+      - REVENUE_PIPE_CURRENCY
+      - REVENUE_PIPE_DRY_RUN
+      - REVENUE_PIPE_MAX_RETRIES
+      - REVENUE_PIPE_BILLING_INTERVAL
+      - REVENUE_PIPE_USE_INVOICES
+
+  # ── Lead intelligence layer ──────────────────────────────────────────────────
+  # rag_hunter: scheduled weekly OSINT hunt (Mon 06:00 UTC).
+  # Depends on nextupdate being healthy (foundation comms layer).
+
+  - name: rag_hunter
+    script: /fractalmesh/agents/rag_hunter.py
+    schedule: "@weekly"
+    log: /fractalmesh/agents/logs/rag_hunter.log
+    restart: on-failure
+    depends_on:
+      - nextupdate
+    env:
+      - CRAWLBASE_NORMAL_TOKEN
+      - CRAWLBASE_JS_TOKEN
+      - SUPABASE_URL
+      - SUPABASE_SERVICE_KEY
+      - OPENAI_API_KEY
+      - ABN
+      - RAG_HUNTER_TARGETS
+      - RAG_HUNTER_PRECINCT
+      - RAG_HUNTER_PRECINCTS
+      - RAG_HUNTER_MAX_RESULTS
+      - RAG_HUNTER_OBJECTIVE
+      - RAG_HUNTER_DRY_RUN
+      - RAG_HUNTER_REFRESH_DAYS
