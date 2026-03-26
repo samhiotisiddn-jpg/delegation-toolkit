@@ -20,15 +20,29 @@ echo -e "${Y}║  Samuel James Hiotis | ABN 56 628 117 363               ║${W}
 echo -e "${Y}╚══════════════════════════════════════════════════════════╝${W}"
 echo ""
 
-# ── STEP 1: Get API keys from user ───────────────────────────────────────────
+# ── STEP 1: Load keys from vault ─────────────────────────────────────────────
 
-inf "You need two things to plug in:"
-echo "  1. Dev.to API key  → https://dev.to/settings/extensions"
-echo "  2. Gumroad token   → https://app.gumroad.com/settings/advanced"
-echo ""
+VAULT="${VAULT:-$HOME/fmsaas/vault/.env}"
 
-read -rp "Enter your Dev.to API key (or press Enter to skip): " DEVTO_KEY
-read -rp "Enter your Gumroad access token (or press Enter to skip): " GUMROAD_KEY
+if [ -f "$VAULT" ]; then
+    inf "Loading credentials from vault: $VAULT"
+    set -a
+    # shellcheck disable=SC1090
+    source "$VAULT"
+    set +a
+    ok "Vault loaded"
+else
+    err "Vault not found at $VAULT"
+    echo "  Set VAULT=/path/to/.env or ensure $HOME/fmsaas/vault/.env exists"
+fi
+
+# Keys may also come from environment directly
+DEVTO_KEY="${DEVTO_API_KEY:-}"
+GUMROAD_KEY="${GUMROAD_ACCESS_TOKEN:-}"
+
+# Report what was found
+[ -n "$DEVTO_KEY" ]   && ok "Dev.to API key found"   || echo -e "${Y}[!]${W} DEVTO_API_KEY not in vault"
+[ -n "$GUMROAD_KEY" ] && ok "Gumroad token found"    || echo -e "${Y}[!]${W} GUMROAD_ACCESS_TOKEN not in vault"
 
 echo ""
 
