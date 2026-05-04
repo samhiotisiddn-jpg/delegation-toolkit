@@ -1,36 +1,116 @@
--- FractalMesh Supabase Schema
--- Run this in your Supabase SQL editor (project: tzdlozmrqhaocccjrwhv)
+-- FractalMesh Supabase Schema v2
+-- Run in Supabase SQL editor (project: trvjsivktildvbwpljsb)
 
 -- ─────────────────────────────────────────────
--- TRADES: KuCoin arbitrage execution log
+-- LEADS: RSS-ingested items with intent scoring
 -- ─────────────────────────────────────────────
-create table if not exists trades (
-  id            uuid primary key default gen_random_uuid(),
-  created_at    timestamptz not null default now(),
-  pair          text not null,          -- e.g. "BTC-USDT"
-  buy_exchange  text not null default 'kucoin',
-  sell_exchange text not null default 'kucoin',
-  buy_price     numeric(20,8) not null,
-  sell_price    numeric(20,8) not null,
-  spread_pct    numeric(8,4) not null,  -- percentage spread
-  quantity      numeric(20,8) not null,
-  pnl_usdt      numeric(20,8),          -- realised P&L
-  status        text not null default 'pending'
-                  check (status in ('pending','executed','failed','skipped')),
-  error         text,
-  raw           jsonb                   -- full exchange response
+create table if not exists leads (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  title        text not null,
+  url          text,
+  source_feed  text,
+  summary      text,
+  intent_score numeric(6,2) not null default 0,
+  tier         text not null default 'basic'
+                 check (tier in ('basic','standard','premium')),
+  tags         text[],
+  synced       boolean not null default false,
+  raw          jsonb
+);
+create index on leads (created_at desc);
+create index on leads (intent_score desc);
+create index on leads (tier, synced);
+
+-- ─────────────────────────────────────────────
+-- AFFILIATES
+-- ─────────────────────────────────────────────
+create table if not exists affiliates (
+  id              uuid primary key default gen_random_uuid(),
+  created_at      timestamptz not null default now(),
+  name            text not null,
+  email           text unique not null,
+  affiliate_code  text unique not null,
+  api_token       text unique not null,
+  commission_rate numeric(4,2) not null default 0.20,
+  total_referrals int not null default 0,
+  total_revenue   numeric(12,2) not null default 0,
+  is_active       boolean not null default true
+);
+create index on affiliates (affiliate_code);
+create index on affiliates (api_token);
+
+-- ─────────────────────────────────────────────
+-- CUSTOMERS: paying subscribers
+-- ─────────────────────────────────────────────
+create table if not exists customers (
+  id                    uuid primary key default gen_random_uuid(),
+  created_at            timestamptz not null default now(),
+  email                 text unique not null,
+  stripe_customer_id    text unique,
+  stripe_subscription_id text,
+  subscription_tier     text not null default 'basic'
+                          check (subscription_tier in ('basic','standard','premium')),
+  access_token          text unique not null,
+  token_expires_at      timestamptz,
+  referred_by           uuid references affiliates(id),
+  is_active             boolean not null default true
+);
+create index on customers (access_token);
+create index on customers (email);
+
+-- ─────────────────────────────────────────────
+-- AFFILIATE_REFERRALS
+-- ─────────────────────────────────────────────
+create table if not exists affiliate_referrals (
+  id              uuid primary key default gen_random_uuid(),
+  created_at      timestamptz not null default now(),
+  affiliate_id    uuid references affiliates(id),
+  customer_id     uuid references customers(id),
+  conversion_aud  numeric(10,2) not null default 0,
+  commission_aud  numeric(10,2) not null default 0,
+  paid_out        boolean not null default false
+);
+create index on affiliate_referrals (affiliate_id, paid_out);
+
+-- ─────────────────────────────────────────────
+-- EMAIL_CAMPAIGNS
+-- ─────────────────────────────────────────────
+create table if not exists email_campaigns (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  name         text not null,
+  subject      text not null,
+  body_text    text not null,
+  body_html    text,
+  status       text not null default 'draft'
+                 check (status in ('draft','sending','sent','failed')),
+  total_sent   int not null default 0,
+  total_opened int not null default 0
 );
 
-create index on trades (created_at desc);
-create index on trades (pair, status);
+-- ─────────────────────────────────────────────
+-- EMAIL_CONTACTS (outreach targets)
+-- ─────────────────────────────────────────────
+create table if not exists email_contacts (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  email        text unique not null,
+  name         text,
+  source       text,
+  tags         text[],
+  last_emailed timestamptz,
+  is_opted_out boolean not null default false
+);
+create index on email_contacts (is_opted_out, last_emailed);
 
 -- ─────────────────────────────────────────────
--- ALERTS: system-wide event log
+-- ALERTS, ORDERS, PRODUCTS, WEBHOOK_EVENTS (from v1)
 -- ─────────────────────────────────────────────
 create table if not exists alerts (
   id          uuid primary key default gen_random_uuid(),
   created_at  timestamptz not null default now(),
-  source      text not null,    -- 'trading','stripe','system','make'
+  source      text not null,
   level       text not null default 'info'
                 check (level in ('info','warn','error','critical')),
   title       text not null,
@@ -38,76 +118,52 @@ create table if not exists alerts (
   slack_sent  boolean not null default false,
   raw         jsonb
 );
-
 create index on alerts (created_at desc);
-create index on alerts (level, slack_sent);
 
--- ─────────────────────────────────────────────
--- PRODUCTS: Stripe product catalogue
--- ─────────────────────────────────────────────
 create table if not exists products (
-  id               uuid primary key default gen_random_uuid(),
-  created_at       timestamptz not null default now(),
+  id                uuid primary key default gen_random_uuid(),
+  created_at        timestamptz not null default now(),
   stripe_product_id text unique,
   stripe_price_id   text,
-  name             text not null,
-  description      text,
-  price_aud        numeric(10,2) not null,
-  active           boolean not null default true,
-  metadata         jsonb
+  name              text not null,
+  description       text,
+  price_aud         numeric(10,2) not null,
+  active            boolean not null default true,
+  metadata          jsonb
 );
 
--- ─────────────────────────────────────────────
--- ORDERS: Stripe payment records
--- ─────────────────────────────────────────────
 create table if not exists orders (
-  id                  uuid primary key default gen_random_uuid(),
-  created_at          timestamptz not null default now(),
-  stripe_session_id   text unique,
+  id                    uuid primary key default gen_random_uuid(),
+  created_at            timestamptz not null default now(),
+  stripe_session_id     text unique,
   stripe_payment_intent text,
-  product_id          uuid references products(id),
-  customer_email      text,
-  amount_aud          numeric(10,2) not null,
-  status              text not null default 'pending'
-                        check (status in ('pending','paid','failed','refunded')),
-  raw                 jsonb
+  product_id            uuid references products(id),
+  customer_email        text,
+  amount_aud            numeric(10,2) not null,
+  status                text not null default 'pending'
+                          check (status in ('pending','paid','failed','refunded')),
+  raw                   jsonb
 );
+create index on orders (status, created_at desc);
 
-create index on orders (created_at desc);
-create index on orders (status);
-
--- ─────────────────────────────────────────────
--- WEBHOOK_EVENTS: Make.com inbound log
--- ─────────────────────────────────────────────
 create table if not exists webhook_events (
   id          uuid primary key default gen_random_uuid(),
   created_at  timestamptz not null default now(),
-  source      text not null,   -- 'make','stripe','kucoin'
+  source      text not null,
   event_type  text,
   payload     jsonb not null,
   processed   boolean not null default false
 );
 
-create index on webhook_events (created_at desc);
-create index on webhook_events (source, processed);
-
 -- ─────────────────────────────────────────────
--- Row-Level Security (enable after setup)
+-- RLS (service_role bypass for backend)
 -- ─────────────────────────────────────────────
-alter table trades        enable row level security;
-alter table alerts        enable row level security;
-alter table products      enable row level security;
-alter table orders        enable row level security;
-alter table webhook_events enable row level security;
-
--- Service-role bypass (your backend uses service_role key)
-create policy "service_role full access on trades"
-  on trades for all using (true);
-create policy "service_role full access on alerts"
-  on alerts for all using (true);
-create policy "service_role full access on products"
-  on products for all using (true);
-create policy "service_role full access on orders"
-  on orders for all using (true);
-create policy "service_role full access on webhook_events"
-  on webhook_events for all using (true);
+do $$ declare t text; begin
+  for t in select unnest(array['leads','affiliates','customers','affiliate_referrals',
+    'email_campaigns','email_contacts','alerts','products','orders','webhook_events'])
+  loop
+    execute format('alter table %I enable row level security', t);
+    execute format(
+      'create policy if not exists "service_role_%s" on %I for all using (true)', t, t);
+  end loop;
+end $$;
