@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import trades, alerts, products, webhooks, github, devto
+from api.routes import trades, alerts, products, webhooks, github, devto, ai, ledger, stripe_connect
 from integrations import slack
 from integrations.github_monitor import alert_new_commits
 
@@ -57,6 +57,9 @@ app.include_router(products.router)
 app.include_router(webhooks.router)
 app.include_router(github.router)
 app.include_router(devto.router)
+app.include_router(ai.router)
+app.include_router(ledger.router)
+app.include_router(stripe_connect.router)
 
 
 @app.get("/health")
