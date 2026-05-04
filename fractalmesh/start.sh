@@ -1,58 +1,51 @@
 #!/usr/bin/env bash
-# FractalMesh — master startup script
-# Usage: ./start.sh [--api-only | --trade-only | --full]
+# FractalMesh — master startup
+# Usage: ./start.sh [--full | --api-only | --trade-only]
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Load .env if present
+# Load .env
 if [ -f ".env" ]; then
     set -a; source .env; set +a
     echo "[ok] .env loaded"
 else
-    echo "[warn] no .env found — expecting environment variables to be set externally"
+    echo "[warn] .env not found — set env vars externally"
 fi
 
 PORT="${PORT:-8080}"
 MODE="${1:---full}"
+mkdir -p logs
 
-# Install dependencies if needed
+# Install python deps if missing
 if ! python3 -c "import fastapi" 2>/dev/null; then
-    echo "[setup] installing python dependencies..."
+    echo "[setup] installing dependencies..."
     pip install -q -r requirements.txt
 fi
 
 start_api() {
-    echo "[api] starting FastAPI on port $PORT..."
-    uvicorn api.main:app --host 0.0.0.0 --port "$PORT" --reload &
-    API_PID=$!
-    echo "[api] pid=$API_PID"
+    echo "[api] starting on :$PORT..."
+    uvicorn api.main:app --host 0.0.0.0 --port "$PORT" > logs/api.log 2>&1 &
+    echo "[api] pid=$!"
 }
 
 start_ngrok() {
     if command -v ngrok &>/dev/null && [ -n "${NGROK_AUTHTOKEN:-}" ]; then
-        echo "[ngrok] starting tunnel → port $PORT..."
-        ngrok start --config ngrok.yml --all > logs/ngrok.log 2>&1 &
-        NGROK_PID=$!
-        echo "[ngrok] pid=$NGROK_PID"
-        sleep 2
-        TUNNEL_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null \
-            | python3 -c "import sys,json; t=json.load(sys.stdin)['tunnels']; print(t[0]['public_url'] if t else '')" 2>/dev/null || echo "unavailable")
-        echo "[ngrok] public url: $TUNNEL_URL"
+        ngrok authtoken "$NGROK_AUTHTOKEN" --log=false 2>/dev/null || true
+        echo "[ngrok] starting tunnel → :$PORT"
+        ngrok http "$PORT" --config ngrok.yml --log stdout > logs/ngrok.log 2>&1 &
+        echo "[ngrok] pid=$! — tail logs/ngrok.log for public URL"
     else
-        echo "[ngrok] skipped (not installed or NGROK_AUTHTOKEN not set)"
+        echo "[ngrok] skipped (install ngrok or set NGROK_AUTHTOKEN)"
     fi
 }
 
 start_trading() {
     echo "[trading] starting arbitrage engine (DRY_RUN=${DRY_RUN:-true})..."
     python3 -m trading.arbitrage > logs/trading.log 2>&1 &
-    TRADE_PID=$!
-    echo "[trading] pid=$TRADE_PID"
+    echo "[trading] pid=$!"
 }
-
-mkdir -p logs
 
 case "$MODE" in
     --api-only)
@@ -69,12 +62,29 @@ case "$MODE" in
         ;;
 esac
 
+sleep 1
 echo ""
-echo "╔══════════════════════════════════════════════════════╗"
-echo "║  FractalMesh LIVE                                    ║"
-echo "║  API:      http://localhost:$PORT                    ║"
-echo "║  Docs:     http://localhost:$PORT/docs               ║"
-echo "║  Health:   http://localhost:$PORT/health             ║"
-echo "╚══════════════════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  FractalMesh v2.0 LIVE                                       ║"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║  API docs:     http://localhost:$PORT/docs                   ║"
+echo "║  Health:       http://localhost:$PORT/health                 ║"
+echo "║                                                              ║"
+echo "║  ENDPOINTS                                                   ║"
+echo "║  GET  /trades                 — arbitrage trade log         ║"
+echo "║  GET  /alerts                 — system alert log            ║"
+echo "║  POST /alerts                 — create alert                ║"
+echo "║  GET  /products               — Stripe products             ║"
+echo "║  POST /products/checkout      — Stripe checkout session     ║"
+echo "║  POST /webhooks/stripe        — Stripe webhook receiver     ║"
+echo "║  POST /webhooks/make          — Make.com webhook receiver   ║"
+echo "║  GET  /github/commits         — repo commit feed            ║"
+echo "║  GET  /github/releases        — repo release feed           ║"
+echo "║  GET  /devto/articles         — DEV.to articles             ║"
+echo "║  POST /devto/publish          — publish to DEV.to           ║"
+echo "║  POST /devto/publish-trade-summary — auto trade article     ║"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║  LOGS: logs/api.log  logs/trading.log  logs/ngrok.log       ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
 
 wait
