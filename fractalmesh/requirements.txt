@@ -1,0 +1,7 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+supabase>=2.4.0
+stripe>=9.0.0
+python-dotenv>=1.0.1
+azure-ai-inference>=1.0.0b9
+feedparser>=6.0.11

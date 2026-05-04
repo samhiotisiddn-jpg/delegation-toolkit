@@ -32,12 +32,12 @@ Grid-Sync Executor: ✅ OPERATIONAL
 ✅ HuggingFace (Mistral-7B)
    └─ Backup AI provider
    └─ Endpoint: router.huggingface.co
-   └─ Token: hf_cOEQbDxqyCQwRjbgY...
+   └─ Token: <REDACTED_ROTATE_IMMEDIATELY>
 
 ✅ Pinecone Vector Database
    └─ RAG knowledge retrieval
    └─ Index: fractalmesh-knowledge
-   └─ API Key: pcsk_21XxHw_CkzCtA6F...
+   └─ API Key: <REDACTED_ROTATE_IMMEDIATELY>
 
 ✅ n8n Workflow Automation
    └─ Webhook URL: iddnapp.app.n8n.cloud/webhook-test/fractalmesh
@@ -45,15 +45,15 @@ Grid-Sync Executor: ✅ OPERATIONAL
    
 ✅ DEV Community Publishing
    └─ Auto-publishes high-confidence decisions (>0.85)
-   └─ API Key: Vc5kU3Q8ynfqTzvTxcnWxFB2
+   └─ API Key: <REDACTED_ROTATE_IMMEDIATELY>
    
 ✅ CloudConvert File Processing
    └─ PDF/DOCX/image conversion
    └─ API configured and ready
 
 ✅ Trading Exchanges
-   ├─ KuCoin: 695164dd9ca9810001f52dfd
-   └─ Pionex: JbVFjmYZ775kEvesWjTkG4Fbcig7cEdj4RENiEtRqt9Qaw7m2khNy6dB4j4xZg3H90
+   ├─ KuCoin: <REDACTED_ROTATE_IMMEDIATELY>
+   └─ Pionex: <REDACTED_ROTATE_IMMEDIATELY>
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎬 VERIFIED END-TO-END WORKFLOW

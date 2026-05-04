@@ -1,0 +1,13 @@
+version: "2"
+authtoken: "${NGROK_AUTHTOKEN}"
+
+tunnels:
+  api:
+    proto: http
+    addr: 8080
+    subdomain: fractalmesh   # requires paid ngrok plan; remove if on free tier
+    inspect: true
+
+  webhooks:
+    proto: http
+    addr: 8080               # same server, different logical label

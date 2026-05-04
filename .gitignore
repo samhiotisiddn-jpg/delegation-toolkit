@@ -1,3 +1,16 @@
+# Secret / credential files — never commit these
+.env
+.env.*
+!.env.example
+*.p12
+*.pem
+*.key
+*.pfx
+*secret*
+*credential*
+*_secret.json
+service-account*.json
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
