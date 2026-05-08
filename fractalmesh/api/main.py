@@ -1,5 +1,6 @@
 """
-FractalMesh API v5 — Full monetisation + automation + market data + print-on-demand
+FractalMesh API v6 — Full sovereign stack
+Trading • Data Oracle • Outreach • AI Cascade • Market Data • TTS • Firebase
 """
 
 import os
@@ -15,9 +16,9 @@ from api.routes import (
     github, devto, ai, ledger, stripe_connect,
     monitoring, automation_routes,
     market_data, printful_routes, telegram_routes,
+    trading, oracle, outreach, lba, firebase_routes, tts_routes,
 )
 from integrations import slack
-from integrations.github_monitor import alert_new_commits
 from agents.automation import start_all_jobs
 
 logging.basicConfig(level=logging.INFO,
@@ -27,9 +28,13 @@ logging.basicConfig(level=logging.INFO,
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     tasks = start_all_jobs()
-    slack.send("FractalMesh v5 online — all automation active", level="info",
-               fields={"port": os.environ.get("PORT", "8080"),
-                       "jobs": str(len(tasks))})
+    slack.send("FractalMesh v6 ONLINE — 8 automation jobs active", level="info",
+               fields={"port": os.environ.get("PORT", "8080"), "jobs": str(len(tasks))})
+    try:
+        from integrations.telegram_bot import alert
+        alert("FractalMesh v6", "All systems online — trading, oracle, outreach, RSS active", "OK")
+    except Exception:
+        pass
     yield
     for t in tasks:
         t.cancel()
@@ -38,8 +43,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="FractalMesh API",
-    version="5.0.0",
-    description="Sovereign revenue stack: RSS datasets, affiliates, SEO, email outreach, market data, print-on-demand",
+    version="6.0.0",
+    description=(
+        "Sovereign autonomous revenue stack — "
+        "Trading · Data Oracle · AI Cascade · Outreach · "
+        "Market Data · Print-on-Demand · TTS · Firebase"
+    ),
     lifespan=lifespan,
 )
 
@@ -51,25 +60,27 @@ app.include_router(leads.router)
 app.include_router(affiliate.router)
 app.include_router(email_campaigns.router)
 app.include_router(seo.router)
+app.include_router(products.router)
+app.include_router(webhooks.router)
+app.include_router(stripe_connect.router)
 
 # ── Automation & monitoring ────────────────────────────────────────────────
 app.include_router(automation_routes.router)
 app.include_router(monitoring.router)
 
 # ── AI layer ───────────────────────────────────────────────────────────────
-app.include_router(ai.router)               # Venice, OpenAI, Gemini, xAI, GitHub, unified
+app.include_router(ai.router)               # Venice · OpenAI · Gemini · xAI · GitHub · unified
 app.include_router(openrouter_routes.router)
 
-# ── Payments ───────────────────────────────────────────────────────────────
-app.include_router(products.router)
-app.include_router(webhooks.router)
-app.include_router(stripe_connect.router)
+# ── Trading ────────────────────────────────────────────────────────────────
+app.include_router(trading.router)
 
-# ── Integrations ───────────────────────────────────────────────────────────
-app.include_router(alerts.router)
-app.include_router(github.router)
-app.include_router(devto.router)
-app.include_router(ledger.router)
+# ── Data oracle ────────────────────────────────────────────────────────────
+app.include_router(oracle.router)
+
+# ── Outreach & LBA ────────────────────────────────────────────────────────
+app.include_router(outreach.router)
+app.include_router(lba.router)
 
 # ── Market data ────────────────────────────────────────────────────────────
 app.include_router(market_data.router)
@@ -77,10 +88,25 @@ app.include_router(market_data.router)
 # ── Print-on-demand ────────────────────────────────────────────────────────
 app.include_router(printful_routes.router)
 
-# ── Telegram ───────────────────────────────────────────────────────────────
+# ── Comms ─────────────────────────────────────────────────────────────────
 app.include_router(telegram_routes.router)
+app.include_router(tts_routes.router)
+
+# ── Firebase ───────────────────────────────────────────────────────────────
+app.include_router(firebase_routes.router)
+
+# ── Dev integrations ──────────────────────────────────────────────────────
+app.include_router(alerts.router)
+app.include_router(github.router)
+app.include_router(devto.router)
+app.include_router(ledger.router)
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "5.0.0"}
+    return {
+        "status": "ok",
+        "version": "6.0.0",
+        "entity": os.getenv("ENTITY", "IronVision Nexus"),
+        "abn": os.getenv("ABN", "56628117363"),
+    }
