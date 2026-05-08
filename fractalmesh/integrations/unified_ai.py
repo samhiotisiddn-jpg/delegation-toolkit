@@ -1,5 +1,6 @@
 """
-Unified AI router — cascades through Venice → OpenRouter → xAI → GitHub AI.
+Unified AI router — cascades through Venice → OpenAI → Google Gemini →
+OpenRouter → xAI → GitHub AI.
 Picks the first provider that succeeds.
 """
 
@@ -24,20 +25,24 @@ def complete(
     prefer: str = "venice",
 ) -> str:
     """Route to best available AI, cascade on failure."""
-    from integrations import venice_ai, openrouter, xai_client, github_ai
+    from integrations import venice_ai, openai_client, google_ai, openrouter, xai_client, github_ai
 
     order = {
         "venice":     [(venice_ai.complete,     "venice",     venice_ai.VENICE_MODELS[0])],
+        "openai":     [(openai_client.complete,  "openai",     "gpt-4o-mini")],
+        "google":     [(google_ai.complete,      "google",     "gemini-2.0-flash")],
         "openrouter": [(openrouter.complete,     "openrouter", openrouter.FREE_MODELS[0])],
         "xai":        [(xai_client.complete,     "xai",        "grok-3")],
         "github":     [(github_ai.complete,      "github",     "microsoft/Phi-4-multimodal-instruct")],
     }.get(prefer, [])
 
     fallbacks = [
-        (venice_ai.complete,  "venice",     venice_ai.VENICE_MODELS[0]),
-        (openrouter.complete, "openrouter", openrouter.FREE_MODELS[0]),
-        (xai_client.complete, "xai",        "grok-3"),
-        (github_ai.complete,  "github",     "microsoft/Phi-4-multimodal-instruct"),
+        (venice_ai.complete,    "venice",     venice_ai.VENICE_MODELS[0]),
+        (openai_client.complete, "openai",    "gpt-4o-mini"),
+        (google_ai.complete,    "google",     "gemini-2.0-flash"),
+        (openrouter.complete,   "openrouter", openrouter.FREE_MODELS[0]),
+        (xai_client.complete,   "xai",        "grok-3"),
+        (github_ai.complete,    "github",     "microsoft/Phi-4-multimodal-instruct"),
     ]
 
     all_providers = order + [f for f in fallbacks if f[1] != prefer]
