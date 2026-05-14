@@ -1,0 +1,134 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FractalMesh Sovereign Orchestrator — Agent Registry
+# Mode B: supervise only, no code mutation, no evolution
+#
+# This file is the constitution of the mesh.
+# Every agent the orchestrator will manage MUST be defined here.
+#
+# Schema
+# ──────
+# name         (str, required)  Unique agent identifier.
+# script       (str, required)  Absolute path to the Python entry-point.
+# port         (int, optional)  TCP port the agent binds to.
+#                               Used for port-binding checks.
+# heartbeat    (str, optional)  HTTP path returning JSON {status:"ok"}.
+#                               Example: /health
+# log          (str, optional)  Absolute path to the agent's log file.
+#                               Used for log-freshness checks.
+# restart      (str, default: always)
+#              always  — restart on any failure (recommended)
+#              never   — do not auto-restart (manual only)
+#              on-failure — restart only when exit code != 0
+# depends_on   (list[str], optional)
+#              Names of agents that MUST be running before this one starts.
+#              The orchestrator uses this to build the DAG and compute safe
+#              restart sequences.
+# env          (list[str], optional)
+#              Names of environment variables this agent needs.
+#              The orchestrator reads values from the current environment and
+#              passes them to the subprocess.  Values are NEVER written here.
+# ─────────────────────────────────────────────────────────────────────────────
+
+agents:
+
+  # ── Foundation layer ────────────────────────────────────────────────────────
+  # nextupdate has no dependencies; if it dies everything restarts in order.
+
+  - name: nextupdate
+    script: /fractalmesh/agents/nextupdate/fractalmesh_nextupdate.py
+    port: 8731
+    heartbeat: /health
+    log: /fractalmesh/agents/nextupdate/logs/nextupdate.log
+    restart: always
+    depends_on: []
+    env:
+      - TELEGRAM_API_ID
+      - TELEGRAM_API_HASH
+      - TELEGRAM_BOT_TOKEN
+      - GITHUB_TOKEN
+
+  # ── Exchange / trading layer ─────────────────────────────────────────────────
+
+  - name: royce
+    script: /fractalmesh/agents/royce/fractalmeshroyceallin.py
+    port: 8887
+    heartbeat: /health
+    log: /fractalmesh/agents/royce/logs/royce.log
+    restart: always
+    depends_on:
+      - nextupdate
+    env:
+      - KUCOIN_API_KEY
+      - KUCOIN_API_SECRET
+      - KUCOIN_API_PASSPHRASE
+      - PIONEX_API_KEY
+      - PIONEX_API_SECRET
+      - OPENAI_API_KEY
+
+  - name: meshmax
+    script: /fractalmesh/agents/meshmax/fractalmesh_meshmax.py
+    port: 8888
+    heartbeat: /health
+    log: /fractalmesh/agents/meshmax/logs/meshmax.log
+    restart: always
+    depends_on:
+      - royce
+    env:
+      - METAMASK_PRIVATE_KEY
+      - ALCHEMY_API_URL
+      - ETH_ADDRESS
+
+  # ── Intelligence / ML layer ──────────────────────────────────────────────────
+
+  - name: ultra
+    script: /fractalmesh/agents/ultra/ultra_agent.py
+    port: 8890
+    heartbeat: /health
+    log: /fractalmesh/agents/ultra/logs/ultra.log
+    restart: always
+    depends_on:
+      - meshmax
+    env:
+      - OPENAI_API_KEY
+      - ANTHROPIC_API_KEY
+      - XAI_API_KEY
+
+  # ── Evolutionary / strategy layer ───────────────────────────────────────────
+
+  - name: evolve
+    script: /fractalmesh/agents/evolve/evolve_agent.py
+    port: 8891
+    heartbeat: /health
+    log: /fractalmesh/agents/evolve/logs/evolve.log
+    restart: always
+    depends_on:
+      - ultra
+    env:
+      - OPENAI_API_KEY
+
+  # ── Convergence / consensus layer ────────────────────────────────────────────
+
+  - name: converge
+    script: /fractalmesh/agents/converge/converge_agent.py
+    port: 8892
+    heartbeat: /health
+    log: /fractalmesh/agents/converge/logs/converge.log
+    restart: always
+    depends_on:
+      - evolve
+    env:
+      - OPENAI_API_KEY
+      - STRIPE_SECRET_KEY
+
+  # ── Local / edge layer ───────────────────────────────────────────────────────
+
+  - name: local
+    script: /fractalmesh/agents/local/local_agent.py
+    port: 8893
+    heartbeat: /health
+    log: /fractalmesh/agents/local/logs/local.log
+    restart: always
+    depends_on:
+      - converge
+    env:
+      - OPENAI_API_KEY
