@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from integrations.supabase_client import insert, query
 from integrations import slack, make_webhooks
 from integrations.openrouter import score_lead, enhance_content
+from integrations.aegis import sanitize
 
 log = logging.getLogger("rss_swarm")
 
@@ -85,15 +86,19 @@ def ingest_once() -> int:
                 continue
             known.add(key)
 
-            score = score_lead(item["title"], item["summary"])
+            # Aegis UTS #39 sanitization before scoring
+            clean_title   = sanitize(item["title"])
+            clean_summary = sanitize(item["summary"])
+
+            score = score_lead(clean_title, clean_summary)
             if score < THRESHOLD:
                 continue
 
-            enhanced = enhance_content(item["title"], item["summary"])
+            enhanced = enhance_content(clean_title, clean_summary)
             tier = "premium" if score >= 75 else "standard" if score >= 55 else "basic"
 
             insert("leads", {
-                "title":       item["title"],
+                "title":       clean_title,
                 "url":         item["url"],
                 "source_feed": feed_url,
                 "summary":     enhanced,
