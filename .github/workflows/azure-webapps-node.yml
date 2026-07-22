@@ -33,28 +33,48 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      has_package_json: ${{ steps.detect.outputs.has_package_json }}
     steps:
     - uses: actions/checkout@v4
 
+    - name: Detect Node project
+      id: detect
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          echo "has_package_json=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has_package_json=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Set up Node.js
+      if: steps.detect.outputs.has_package_json == 'true'
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
     - name: npm install, build, and test
+      if: steps.detect.outputs.has_package_json == 'true'
       run: |
         npm install
         npm run build --if-present
         npm run test --if-present
 
+    - name: Skip Node build (no package.json)
+      if: steps.detect.outputs.has_package_json != 'true'
+      run: echo "Skipping Node build because package.json is not present in the repository root."
+
     - name: Upload artifact for deployment job
+      if: steps.detect.outputs.has_package_json == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: node-app
         path: .
 
   deploy:
+    if: needs.build.outputs.has_package_json == 'true' && env.AZURE_WEBAPP_NAME != 'your-app-name' && secrets.AZURE_WEBAPP_PUBLISH_PROFILE != ''
     permissions:
       contents: none
     runs-on: ubuntu-latest

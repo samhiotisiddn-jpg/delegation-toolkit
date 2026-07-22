@@ -1,2 +1,2 @@
 # delegation-toolkit
-This repository contains the core smart contracts of the Aave V3 protocol.
+This repository contains automation tooling, integrations, and API services for the FractalMesh delegation toolkit.
