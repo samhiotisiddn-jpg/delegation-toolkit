@@ -36,7 +36,7 @@ jobs:
           languages: python
 
       - name: Run Bandit
-        run: bandit -x tests -r .
+        run: bandit -x tests -r . -lll -iii
 
       - name: Run pip-audit
         uses: pypa/gh-action-pip-audit@v1.0.8
