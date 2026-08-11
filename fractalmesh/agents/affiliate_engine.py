@@ -20,16 +20,11 @@ Components:
   5. Performance analytics (CTR, CVR, EPC, ROAS)
 """
 
-import os
 import json
 import random
 import logging
-import hashlib
-import urllib.request
-import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from integrations.supabase_client import insert, query as sb_query
 
 log = logging.getLogger("affiliate_engine")
 
@@ -121,7 +116,6 @@ def select_variant(test_id: str) -> dict:
         return {}
     variants = AD_VARIANTS[test_id]
     # Thompson sampling: sample Beta(alpha=conv+1, beta=clicks-conv+1)
-    import math
     scores = []
     for v in variants:
         alpha = v["conversions"] + 1

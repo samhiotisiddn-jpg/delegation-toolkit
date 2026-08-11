@@ -1,4 +1,3 @@
-import json
 from fastapi import APIRouter, Request, HTTPException, Header
 from integrations import stripe_client, slack, make_webhooks
 from integrations.supabase_client import insert, update, query

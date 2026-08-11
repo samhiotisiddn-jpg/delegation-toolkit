@@ -1,5 +1,5 @@
 """ElevenLabs TTS routes — text-to-speech MP3 generation."""
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 

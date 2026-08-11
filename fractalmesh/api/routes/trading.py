@@ -1,5 +1,5 @@
 """Trading engine routes — multi-exchange autonomous trading."""
-from fastapi import APIRouter, Query, Body, HTTPException
+from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/trading", tags=["trading"])
