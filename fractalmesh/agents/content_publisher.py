@@ -4,7 +4,7 @@ and syncs summaries to Slack + Make.com.
 """
 
 import logging
-from integrations.supabase_client import query, update
+from integrations.supabase_client import query
 from integrations.devto import publish_article
 from integrations import slack, make_webhooks
 from integrations.unified_ai import complete

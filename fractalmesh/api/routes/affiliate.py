@@ -1,6 +1,6 @@
 import secrets
 from fastapi import APIRouter, Body, Header, HTTPException
-from integrations.supabase_client import query, insert, update
+from integrations.supabase_client import query, insert
 from integrations import slack
 
 router = APIRouter(prefix="/affiliate", tags=["affiliate"])

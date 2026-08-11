@@ -14,7 +14,6 @@ import hashlib
 import logging
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
 
 from integrations.supabase_client import insert, query
 from integrations import slack, make_webhooks

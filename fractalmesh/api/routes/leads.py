@@ -4,7 +4,6 @@ Public: 5 results, no scores.
 Standard/Premium: full dataset with scores via bearer token.
 """
 
-import os
 import secrets
 from fastapi import APIRouter, Query, Header, HTTPException, Body
 from fastapi.responses import Response

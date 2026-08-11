@@ -11,7 +11,6 @@ Env vars:
 import os
 import json
 import urllib.request
-from datetime import datetime, timezone
 
 from integrations import slack, make_webhooks
 from integrations.supabase_client import insert

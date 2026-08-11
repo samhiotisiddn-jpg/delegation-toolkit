@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body
 from integrations import stripe_client
-from integrations.supabase_client import query, insert
+from integrations.supabase_client import insert
 
 router = APIRouter(prefix="/products", tags=["products"])
 

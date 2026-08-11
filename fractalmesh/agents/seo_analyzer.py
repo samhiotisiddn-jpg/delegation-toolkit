@@ -4,7 +4,6 @@ and affiliate link opportunities using OpenRouter LLMs.
 """
 
 import re
-import os
 from integrations.openrouter import complete, FREE_MODELS
 
 

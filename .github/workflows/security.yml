@@ -1,0 +1,49 @@
+name: security
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  schedule:
+    - cron: "15 3 * * *"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f fractalmesh/requirements.txt ]; then pip install -r fractalmesh/requirements.txt; fi
+          if [ -f fractalmesh/orchestrator/requirements.txt ]; then pip install -r fractalmesh/orchestrator/requirements.txt; fi
+          pip install bandit pip-audit
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Run Bandit
+        run: bandit -x tests -r . -lll -iii
+
+      - name: Run pip-audit
+        uses: pypa/gh-action-pip-audit@v1.0.8
+        with:
+          inputs: |
+            fractalmesh/requirements.txt
+            fractalmesh/orchestrator/requirements.txt
+
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@v3

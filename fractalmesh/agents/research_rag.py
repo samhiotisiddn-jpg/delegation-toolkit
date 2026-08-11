@@ -17,13 +17,11 @@ Pipeline:
   4. Query: embed query → cosine rank → return top-k → feed to LLM
 """
 
-import os
 import json
 import logging
 import hashlib
 import urllib.request
 import urllib.parse
-from datetime import datetime
 
 log = logging.getLogger("research_rag")
 

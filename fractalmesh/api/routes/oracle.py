@@ -1,6 +1,5 @@
 """WiGLE RF data oracle + Copernicus satellite DEM routes."""
 from fastapi import APIRouter, Query, HTTPException
-from fastapi.responses import FileResponse
 import os
 
 router = APIRouter(prefix="/oracle", tags=["oracle"])
