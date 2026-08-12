@@ -10,6 +10,27 @@
 *credential*
 *_secret.json
 service-account*.json
+credentials*.json
+*.secrets
+.keychain
+*.keystore
+*.jks
+key.json
+.pypirc
+.npmrc
+.netrc
+.tokens
+*.token
+
+# Runtime / local state
+logs/*.log
+*.log
+*.pid
+*.sock
+tmp/
+temp/
+.cache/
+.DS_Store
 
 # http://www.gnu.org/software/automake
 
